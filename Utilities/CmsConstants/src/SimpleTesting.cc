@@ -1,23 +1,3 @@
-// -*- C++ -*-
-//
-// Package:    SimpleTesting
-// Class:      SimpleTesting
-// 
-/**\class SimpleTesting SimpleTesting.cc MyFilters/SimpleTesting/src/SimpleTesting.cc
-
- Description: [one line class summary]
-
- Implementation:
-     [Notes on implementation]
-*/
-//
-// Original Author:  Stoyan Stoynev
-//         Created:  Fri Jun 10 12:13:35 CDT 2011
-// $Id$
-//
-//
-
-
 // system include files
 #include <memory>
 
@@ -81,8 +61,6 @@ SimpleTesting::SimpleTesting(const edm::ParameterSet& iConfig)
 {
    //now do what ever initialization is needed
 
-//    string rootFileName         = "histAna.root";
-//    theFile = new TFile(rootFileName.c_str(), "RECREATE");
    testPy_  = iConfig.getUntrackedParameter<double>("testPy");
 
 }
