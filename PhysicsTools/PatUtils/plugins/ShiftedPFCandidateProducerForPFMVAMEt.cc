@@ -1,68 +1,67 @@
-#include "PhysicsTools/PatUtils/plugins/ShiftedPFCandidateProducerByMatchedObject.h"
+#include "PhysicsTools/PatUtils/plugins/ShiftedPFCandidateProducerForPFMVAMEt.h"
+
+#include "DataFormats/Math/interface/deltaR.h"
 
 const double dRDefault = 1000;
 
-ShiftedPFCandidateProducerByMatchedObject::ShiftedPFCandidateProducerByMatchedObject(const edm::ParameterSet& cfg)
+ShiftedPFCandidateProducerForPFMVAMEt::ShiftedPFCandidateProducerForPFMVAMEt(const edm::ParameterSet& cfg)
+  : moduleLabel_(cfg.getParameter<std::string>("@module_label"))
+  , srcPFCandidatesToken_(consumes<reco::PFCandidateCollection>(cfg.getParameter<edm::InputTag>("srcPFCandidates")))
+  , srcUnshiftedObjectsToken_(consumes<CandidateView>(cfg.getParameter<edm::InputTag>("srcUnshiftedObjects")))
+  , srcShiftedObjectsToken_(consumes<CandidateView>(cfg.getParameter<edm::InputTag>("srcShiftedObjects")))
 {
-  srcPFCandidates_ = consumes<reco::PFCandidateCollection>(cfg.getParameter<edm::InputTag>("srcPFCandidates"));
-  srcUnshiftedObjects_ = consumes<edm::View<reco::Candidate> >(cfg.getParameter<edm::InputTag>("srcUnshiftedObjects"));
-  srcShiftedObjects_ = consumes<edm::View<reco::Candidate> >(cfg.getParameter<edm::InputTag>("srcShiftedObjects"));
-
   dRmatch_PFCandidate_ = cfg.getParameter<double>("dRmatch_PFCandidate");
-  dR2match_PFCandidate_ = dRmatch_PFCandidate_*dRmatch_PFCandidate_;
   dRmatch_Object_ = cfg.exists("dRmatch_Object") ?
     cfg.getParameter<double>("dRmatch_Object") : 0.1;
+
+  dR2match_PFCandidate_ = dRmatch_PFCandidate_*dRmatch_PFCandidate_; 
   dR2match_Object_ = dRmatch_Object_*dRmatch_Object_;
+  
   produces<reco::PFCandidateCollection>();
 }
 
-ShiftedPFCandidateProducerByMatchedObject::~ShiftedPFCandidateProducerByMatchedObject()
+ShiftedPFCandidateProducerForPFMVAMEt::~ShiftedPFCandidateProducerForPFMVAMEt()
 {
 // nothing to be done yet...
 }
 
-void ShiftedPFCandidateProducerByMatchedObject::produce(edm::Event& evt, const edm::EventSetup& es)
+void ShiftedPFCandidateProducerForPFMVAMEt::produce(edm::Event& evt, const edm::EventSetup& es)
 {
   edm::Handle<reco::PFCandidateCollection> originalPFCandidates;
-  evt.getByToken(srcPFCandidates_, originalPFCandidates);
-
-  typedef edm::View<reco::Candidate> CandidateView;
+  evt.getByToken(srcPFCandidatesToken_, originalPFCandidates);
 
   edm::Handle<CandidateView> unshiftedObjects;
-  evt.getByToken(srcUnshiftedObjects_, unshiftedObjects);
+  evt.getByToken(srcUnshiftedObjectsToken_, unshiftedObjects);
 
   edm::Handle<CandidateView> shiftedObjects;
-  evt.getByToken(srcShiftedObjects_, shiftedObjects);
+  evt.getByToken(srcShiftedObjectsToken_, shiftedObjects);
 
   objects_.clear();
-  
-  CandidateView::const_iterator shiftedObjectP4_matched;
-  bool isMatched_Object = false;
-  double dR2bestMatch_Object = dRDefault;
+
   for ( CandidateView::const_iterator unshiftedObject = unshiftedObjects->begin();
 	unshiftedObject != unshiftedObjects->end(); ++unshiftedObject ) {
-    isMatched_Object = false;
-    dR2bestMatch_Object = dRDefault;
-   
+    bool isMatched_Object = false;
+    double dR2bestMatch_Object = dRDefault;
+    reco::Candidate::LorentzVector shiftedObjectP4_matched;
     for ( CandidateView::const_iterator shiftedObject = shiftedObjects->begin();
 	shiftedObject != shiftedObjects->end(); ++shiftedObject ) {
       double dR2 = deltaR2(unshiftedObject->p4(), shiftedObject->p4());
       if ( dR2 < dR2match_Object_ && dR2 < dR2bestMatch_Object ) {
-	shiftedObjectP4_matched = shiftedObject;
+	shiftedObjectP4_matched = shiftedObject->p4();
 	isMatched_Object = true;
 	dR2bestMatch_Object = dR2;
       }
     }
     if ( isMatched_Object ) {
-      objects_.push_back(objectEntryType(shiftedObjectP4_matched->p4(), unshiftedObject->p4(), sqrt(dR2bestMatch_Object) ));
+      objects_.push_back(objectEntryType(shiftedObjectP4_matched, unshiftedObject->p4(), sqrt(dR2bestMatch_Object)));
     }
   }
- 
+
   std::auto_ptr<reco::PFCandidateCollection> shiftedPFCandidates(new reco::PFCandidateCollection);
-    
+
   for ( reco::PFCandidateCollection::const_iterator originalPFCandidate = originalPFCandidates->begin();
 	originalPFCandidate != originalPFCandidates->end(); ++originalPFCandidate ) {
-    
+
     double shift = 0.;
     bool applyShift = false;
     double dR2bestMatch_PFCandidate = dRDefault;
@@ -76,29 +75,22 @@ void ShiftedPFCandidateProducerByMatchedObject::produce(edm::Event& evt, const e
 	dR2bestMatch_PFCandidate = dR2;
       }
     }
-    
+
     reco::Candidate::LorentzVector shiftedPFCandidateP4 = originalPFCandidate->p4();
-    if ( applyShift ) {
-      double shiftedPx = (1. + shift)*originalPFCandidate->px();
-      double shiftedPy = (1. + shift)*originalPFCandidate->py();
-      double shiftedPz = (1. + shift)*originalPFCandidate->pz();
-      double mass = originalPFCandidate->mass();
-      double shiftedEn = sqrt(shiftedPx*shiftedPx + shiftedPy*shiftedPy + shiftedPz*shiftedPz + mass*mass);
-      shiftedPFCandidateP4.SetPxPyPzE(shiftedPx, shiftedPy, shiftedPz, shiftedEn);
-    }
-    
-    reco::PFCandidate shiftedPFCandidate(*originalPFCandidate);      
+    if ( applyShift ) shiftedPFCandidateP4 *= (1. + shift);
+
+    reco::PFCandidate shiftedPFCandidate(*originalPFCandidate);
     shiftedPFCandidate.setP4(shiftedPFCandidateP4);
-    
+
     shiftedPFCandidates->push_back(shiftedPFCandidate);
   }
-  
+
   evt.put(shiftedPFCandidates);
 }
 
 #include "FWCore/Framework/interface/MakerMacros.h"
 
-DEFINE_FWK_MODULE(ShiftedPFCandidateProducerByMatchedObject);
+DEFINE_FWK_MODULE(ShiftedPFCandidateProducerForPFMVAMEt);
 
 
- 
+
