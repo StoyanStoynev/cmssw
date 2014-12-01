@@ -1,0 +1,11 @@
+_packedPFCandidates
+_packedGenParticles\|_prunedGenParticles\|_slimmedGenJets\|_generator_
+_slimmedTaus_
+_slimmedMuons
+_slimmedElectrons
+_slimmedPhotons
+_slimmedJets
+_slimmedMET
+_slimmedSecondaryVertices
+_reducedEgamma_
+_selectedPatTrigger
