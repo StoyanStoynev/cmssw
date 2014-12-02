@@ -9,7 +9,7 @@ echo
 echo Absolute numbers are Bytes/Event 
 echo
 denom=`./sumMatched_RECO_lastFileds.sh $2 .`
-denomPF=`./sumMatched_RECO_lastFileds.sh $2 PF`
+denomPF=`./sumMatched_RECO_lastFileds.sh $2 "pf\|PF"`
 echo "======" RECO size: $denom "======"
 echo "======" Size of branches containing PF : $denomPF "======"
 echo 
