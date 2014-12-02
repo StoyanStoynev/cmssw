@@ -21,7 +21,6 @@ export final_num=0
 for i in `cat $1`; 
 do
  echo Branches containing $i :
-# echo Size of  $i [fraction of RECO]
  num=`./sumMatched_PF_RECO_lastFileds.sh $2 $i`
  if [ -z $num ]
  then

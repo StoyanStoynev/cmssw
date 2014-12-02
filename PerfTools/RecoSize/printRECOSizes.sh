@@ -12,10 +12,8 @@ denom=`./sumMatched_RECO_lastFileds.sh $2 .`
 all=`./sumMatched_lastFileds.sh $2 .`
 sim=`./sumMatched_lastFileds.sh $2 _SIM`
 hlt=`./sumMatched_lastFileds.sh $2 _HLT`
-#reco=`./sumMatched_lastFileds.sh $2 _RECO`
 echo 
 echo Total size : $all
-#echo reco size : $reco
 echo SIM size : $sim
 echo HLT size : $hlt
 echo 
@@ -28,23 +26,15 @@ echo
 export final_num=0
 for i in `cat $1`; 
 do
-# echo Size of $i [fraction of RECO]
  echo Branches containing $i : 
  num=`./sumMatched_RECO_lastFileds.sh $2 $i`
  if [ -z $num ]
  then
    num=0
  fi 
-# denom=`./sumMatched_RECO_lastFileds.sh $2 .`
  export result=`echo "scale=4;$num/$denom" | bc`
  final_num=`echo "scale=4;$final_num+$num" | bc`
-# echo $num / $denom = $result
-# echo "    " $num " <<--|-->> "  $result 
  printf "    %.1f \t <<--|-->> \t %.4f   \n"  $num $result 
-# echo "scale=4;$num/$denom" | bc
-# setenv result `echo "scale=4;$num/$denom" | bc`
-# echo $result
-# echo 
 done
 echo "    -----    "
 export final_result=`echo "scale=4;$final_num/$denom" | bc`
