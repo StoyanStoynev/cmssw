@@ -9,7 +9,7 @@ RecHitsSorted_reduced
 _ecalRecHit_\|_ecalPreshowerRecHit_
 _generalTracks_
 _muons_\|Muons1Leg\|_tevMuons_\|_globalCosmicMuons\|_standAlone\|StandAlone\|_globalSET\|_cosmicMuons_\|_globalMuons_\|Cosmics1Leg_\|FromCosmics_\|MuonSeed_\|_calomuons_\|MuonSeeds_
-recoJetedmRefToBase\|Fastjet\|_ak7BasicJets_\|_ak4TrackJets_\|_ak4CaloJets_\|_ak5CaloJets_\||_trackRefsForJets_\|_ak7CastorJetID_\|JetID_\|AntiKt4_
+recoJetedmRefToBase\|Fastjet\|_ak7BasicJets_\|_ak4TrackJets_\|_ak4CaloJets_\|_ak5CaloJets_\|_trackRefsForJets_\|_ak7CastorJetID_\|JetID_\|AntiKt4_
 recoCaloMETs_
 recoPhotons_\|recoPhotonCores_\|recoPhotonsreco\|_PhotonIDProd
 _electronGsfTracks_\|ElectronSeeds_\|recoGsfElectrons_\|recoGsfElectronCores_
