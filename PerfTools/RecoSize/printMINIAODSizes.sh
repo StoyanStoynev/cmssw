@@ -24,11 +24,16 @@ echo Differential sizes:
 echo
 printf "    ABSOLUTE SIZE \t <<--|-->> \t FRACTIONAL SIZE (from PAT)"
 echo
+export final_num=0
 for i in `cat $1`; 
 do
  echo Branches containing $i :
  num=`./sumMatched_MINIAOD_lastFileds.sh $2 $i`
  export result=`echo "scale=4;$num/$denom" | bc`
+ final_num=`echo "scale=4;$final_num+$num" | bc`
  printf "    %.1f \t <<--|-->> \t %.4f   \n"  $num $result
 done
 echo "    -----    "
+export final_result=`echo "scale=4;$final_num/$denom" | bc`
+echo "     SUM:    "
+printf "    %.1f \t <<--|-->> \t %.4f   \n"  $final_num $final_result

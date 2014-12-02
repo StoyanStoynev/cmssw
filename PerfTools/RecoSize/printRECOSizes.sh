@@ -25,6 +25,7 @@ echo Differential sizes:
 echo
 printf "    ABSOLUTE SIZE \t <<--|-->> \t FRACTIONAL SIZE (from RECO)"
 echo
+export final_num=0
 for i in `cat $1`; 
 do
 # echo Size of $i [fraction of RECO]
@@ -36,6 +37,7 @@ do
  fi 
 # denom=`./sumMatched_RECO_lastFileds.sh $2 .`
  export result=`echo "scale=4;$num/$denom" | bc`
+ final_num=`echo "scale=4;$final_num+$num" | bc`
 # echo $num / $denom = $result
 # echo "    " $num " <<--|-->> "  $result 
  printf "    %.1f \t <<--|-->> \t %.4f   \n"  $num $result 
@@ -45,3 +47,6 @@ do
 # echo 
 done
 echo "    -----    "
+export final_result=`echo "scale=4;$final_num/$denom" | bc`
+echo "     SUM:    "
+printf "    %.1f \t <<--|-->> \t %.4f   \n"  $final_num $final_result
